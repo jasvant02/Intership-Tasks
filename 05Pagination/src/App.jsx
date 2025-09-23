@@ -1,40 +1,81 @@
 import { useEffect } from "react";
 import { useState } from "react";
+import { useDebounce } from "./usedebounce";
 
 const App = () => {
   const [apidata, setApidata] = useState([]);
   const [load, setLoad] = useState(true);
   const [page, setpage] = useState(1);
   const [totalpage, setTotalpage] = useState(0);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("none");
+  const [form, setForm] = useState(false);
+  const [edit, setEdit] = useState("");
+  const seachterm = useDebounce(search, 1000);
 
   const DOTS = "...";
   // const totalpage = Math.ceil(data.total / 10);
   // console.log(totalpage);
+  const fetchApii = async (skipp = 0, Searching = "") => {
+    setLoad(true);
+    let api = `https://dummyjson.com/products?limit=10&skip=${skipp}&select=title,price`;
 
-  const fetchApii = async (skipp = 0) => {
-    // console.log("skipp", skipp);
-    const response = await fetch(
-      `https://dummyjson.com/products?limit=10&skip=${skipp}&select=title,price`
-    );
-    const data = await response.json();
-    setApidata(data);
-    setLoad(false);
-    const totalpages = Math.ceil(data.total / data.limit);
-    setTotalpage(Math.min(totalpages, 20));
+    if (Searching !== "") {
+      api = `https://dummyjson.com/products/search?q=${Searching}&limit=10&skip=${skipp}&select=title,price`;
+    }
+
+    try {
+      const response = await fetch(api);
+      const data = await response.json();
+      setApidata(data);
+      const totalpages = Math.ceil(data.total / data.limit);
+      setTotalpage(Math.min(totalpages, 20));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoad(false);
+    }
   };
 
   useEffect(() => {
-    fetchApii();
-  }, []);
+    setpage(1);
+    fetchApii(0, seachterm);
+  }, [seachterm]);
 
   console.log(apidata);
+
+  const handlebyprice = () => {
+    if (sort === "none" || sort === "desc") {
+      setSort("asc");
+    } else {
+      setSort("desc");
+    }
+  };
+  const sorted = apidata?.products
+    ? [...apidata.products].sort((a, b) => {
+        if (sort === "asc") {
+          return a.price - b.price;
+        }
+        if (sort === "desc") {
+          return b.price - a.price;
+        }
+        return 0;
+      })
+    : [];
+
+  const handleSearch = (e) => {
+    const newSearch = e.target.value;
+    setSearch(newSearch);
+    // setpage(1);
+    // fetchApii(0, newSearch);
+  };
 
   const handleCallNew = (newpage) => {
     console.log("GG");
     if (newpage >= 1 && newpage <= totalpage) {
       const skipp = (newpage - 1) * 10;
       setpage(newpage);
-      fetchApii(skipp);
+      fetchApii(skipp, seachterm);
     }
   };
 
@@ -46,61 +87,115 @@ const App = () => {
 
     range.push(1);
 
-    if (startPage > 2) {
-      range.push(DOTS);
-    }
+    if (startPage > 2) range.push(DOTS);
 
-    for (let i = startPage; i <= endPage; i++) {
-      range.push(i);
-    }
+    for (let i = startPage; i <= endPage; i++) range.push(i);
 
-    if (endPage < totalpage - 1) {
-      range.push(DOTS);
-    }
+    if (endPage < totalpage - 1) range.push(DOTS);
 
-    if (!range.includes(totalpage)) {
-      range.push(totalpage);
-    }
+    if (!range.includes(totalpage)) range.push(totalpage);
 
     return range;
   };
 
-  const paginationRange = getPagination();
   if (load) {
     return <p>Loading...</p>;
   }
-  // const handledelete = (e) => {
-  //   const filterid = apidata.products.filter((e) => {
-  //     return e.id != 10;
-  //   });
 
-  //   setApidata({
-  //     ...apidata,
-  //     raj: {
-  //       ...apidata,
-  //       limit: "jas",
-  //       products: [...filterid, { title: "heloo" }, { title: apidata }],
-  //     },
-  //   });
+  const handledelete = (id) => {
+    const filterid = apidata.products.filter((e) => e.id !== id);
 
+    // const spliced = apidata.products.map((e) => {
+    //   return apidata.products.id.splice(10, 1);
+    // });
+
+    setApidata({
+      ...apidata,
+      products: filterid,
+
+      // raj: {
+      //   ...apidata,
+      //   limit: "jas",
+      //   products: [...filterid, { title: "heloo" }],
+      // },
+      // mahesh: { ...apidata, one: [...filterid, { title: "ram" }, { id: 8 }] },
+    });
+  };
+
+  // const handleform = () => {
+  //   setForm(true);
   // };
+
+  const handlEdit = (item) => {
+    setEdit(item);
+    setForm(true);
+  };
+
+  const handleForm = (e) => {
+    setEdit({
+      ...edit,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleupdate = (e) => {
+    e.preventDefault();
+
+    const updateitem = apidata.products.map((item) =>
+      item.id === edit.id ? edit : item
+    );
+    // const form = {
+    //   id: "232",
+    //   price: "3541",
+    //   title: "jcvgjk",
+    // };
+
+    // const updatepro = [...apidata.products, update];
+
+    setApidata({
+      ...apidata,
+      products: updateitem,
+    });
+    setForm(false);
+    setEdit("");
+  };
+
+  const paginationRange = getPagination();
   return (
     <>
       <h1>Pagination </h1>
+      <input
+        type="text"
+        placeholder="Search by title"
+        value={search}
+        onChange={handleSearch}
+      />
       <table>
         <thead>
           <tr>
             <th>ID</th>
-            <th>Price</th>
+            <th onClick={handlebyprice}>
+              Price
+              {sort === "asc" && " ↑"}
+              {sort === "desc" && " ↓"}
+            </th>
             <th>Title</th>
+            <th>manage</th>
+            <th>Edit</th>
           </tr>
         </thead>
         <tbody>
-          {apidata?.products?.map((items, index) => (
-            <tr key={index}>
+          {sorted?.map((items) => (
+            <tr key={items.id}>
               <td>{items.id}</td>
               <td>{items.price}</td>
               <td>{items.title}</td>
+              <td>
+                <button onClick={() => handledelete(items.id)}>del</button>
+              </td>
+              <td>
+                <button onClick={() => handlEdit(items)}>Edit</button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -109,6 +204,7 @@ const App = () => {
         onClick={() => {
           handleCallNew(page - 1);
         }}
+        disabled={page == 1}
       >
         previous
       </button>
@@ -136,10 +232,38 @@ const App = () => {
         onClick={() => {
           handleCallNew(page + 1);
         }}
+        disabled={page == totalpage}
       >
         Next
       </button>
-      {/* <button onClick={handledelete}>delt</button> */}
+      {/* <button onClick={handledelete}>delt</button>
+
+      <button onClick={handleupdate}>update</button> */}
+      <hr />
+      {form && edit && (
+        <div>
+          <form onSubmit={handleupdate}>
+            <input type="number" placeholder="id" value={edit.id} readOnly />
+            <input
+              type="text"
+              id="title"
+              name="title"
+              placeholder="Enter title"
+              value={edit.title}
+              onChange={handleForm}
+            />
+            <input
+              type="number"
+              id="price"
+              name="price"
+              placeholder="Enter price"
+              value={edit.price}
+              onChange={handleForm}
+            />
+            <button>Update</button>
+          </form>
+        </div>
+      )}
     </>
   );
 };
