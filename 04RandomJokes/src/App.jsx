@@ -32,8 +32,8 @@ function App() {
     <>
       <h1>Random Jokes Generator</h1>
 
-      <button onClick={triggerShiv("first")}>111</button>
-      <button onClick={triggerShiv("2nd")}>222`</button>
+      {/* <button onClick={triggerShiv("first")}>111</button>
+      <button onClick={triggerShiv("2nd")}>222`</button> */}
 
       <p>{cJoke}</p>
       <button onClick={generateJoke}>Generate Joke</button>

@@ -1,23 +1,29 @@
 import { useEffect } from "react";
 import { useState } from "react";
 import { useDebounce } from "./usedebounce";
+// import { Converts } from "../componets/Converts";
 
 const App = () => {
-  const [apidata, setApidata] = useState([]);
+  const [apidata, setApidata] = useState([]); //for fetching api state
   const [load, setLoad] = useState(true);
-  const [page, setpage] = useState(1);
-  const [totalpage, setTotalpage] = useState(0);
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("none");
-  const [form, setForm] = useState(false);
-  const [edit, setEdit] = useState("");
+
+  const [totalpage, setTotalpage] = useState(0); //pagination
+  const [search, setSearch] = useState(""); //Searching
+  const [sort, setSort] = useState("none"); //Sorting
+  // const [form, setForm] = useState(true); //form based changes..
+  // const [edit, setEdit] = useState({ id: "", title: "", price: "" });
   const seachterm = useDebounce(search, 1000);
+  const getPageUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+    return parseInt(params.get("page"));
+  };
+  const [page, setpage] = useState(getPageUrl);
 
   const DOTS = "...";
   // const totalpage = Math.ceil(data.total / 10);
   // console.log(totalpage);
   const fetchApii = async (skipp = 0, Searching = "") => {
-    setLoad(true);
+    // setLoad(true);
     let api = `https://dummyjson.com/products?limit=10&skip=${skipp}&select=title,price`;
 
     if (Searching !== "") {
@@ -36,13 +42,20 @@ const App = () => {
       setLoad(false);
     }
   };
+  // useEffect(() => {}, []);
 
   useEffect(() => {
-    setpage(1);
-    fetchApii(0, seachterm);
-  }, [seachterm]);
+    const skipp = (page - 1) * 10;
+    fetchApii(skipp, seachterm);
 
-  console.log(apidata);
+    const handleUrl = () => {
+      setpage(getPageUrl());
+    };
+    window.addEventListener("popstate", handleUrl);
+    // return () => window.removeEventListener("popstate", handleUrlChange);
+  }, [page, seachterm]);
+
+  // console.log(apidata);
 
   const handlebyprice = () => {
     if (sort === "none" || sort === "desc") {
@@ -66,16 +79,18 @@ const App = () => {
   const handleSearch = (e) => {
     const newSearch = e.target.value;
     setSearch(newSearch);
+    handleCallNew(1, newSearch);
     // setpage(1);
     // fetchApii(0, newSearch);
   };
 
   const handleCallNew = (newpage) => {
-    console.log("GG");
     if (newpage >= 1 && newpage <= totalpage) {
-      const skipp = (newpage - 1) * 10;
       setpage(newpage);
-      fetchApii(skipp, seachterm);
+      const params = new URLSearchParams();
+      params.set("page", newpage);
+
+      window.history.replaceState(null, "", `?${params}`);
     }
   };
 
@@ -102,63 +117,74 @@ const App = () => {
     return <p>Loading...</p>;
   }
 
-  const handledelete = (id) => {
-    const filterid = apidata.products.filter((e) => e.id !== id);
+  // const handledelete = (id) => {
+  //   const filterid = apidata.products.filter((e) => e.id !== id);
 
-    // const spliced = apidata.products.map((e) => {
-    //   return apidata.products.id.splice(10, 1);
-    // });
+  //   // const spliced = apidata.products.map((e) => {
+  //   //   return apidata.products.id.splice(10, 1);
+  //   // });
 
-    setApidata({
-      ...apidata,
-      products: filterid,
+  //   setApidata({
+  //     ...apidata,
+  //     products: filterid,
 
-      // raj: {
-      //   ...apidata,
-      //   limit: "jas",
-      //   products: [...filterid, { title: "heloo" }],
-      // },
-      // mahesh: { ...apidata, one: [...filterid, { title: "ram" }, { id: 8 }] },
-    });
-  };
+  //     // raj: {
+  //     //   ...apidata,
+  //     //   limit: "jas",
+  //     //   products: [...filterid, { title: "heloo" }],
+  //     // },
+  //     // mahesh: { ...apidata, one: [...filterid, { title: "ram" }, { id: 8 }] },
+  //   });
+  // };
 
   // const handleform = () => {
   //   setForm(true);
   // };
 
-  const handlEdit = (item) => {
-    setEdit(item);
-    setForm(true);
-  };
+  // const handlEdit = (item) => {
+  //   setEdit(item);
+  //   setForm(true);
+  // };
 
-  const handleForm = (e) => {
-    setEdit({
-      ...edit,
-      [e.target.name]: e.target.value,
-    });
-  };
+  // const handleForm = (e) => {
+  //   setEdit({
+  //     ...edit,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
+  // const handleIdChange = (e) => {
+  //   const id = parseInt(e.target.value);
 
-  const handleupdate = (e) => {
-    e.preventDefault();
+  //   // setEdit({ ...edit, id: id });
 
-    const updateitem = apidata.products.map((item) =>
-      item.id === edit.id ? edit : item
-    );
-    // const form = {
-    //   id: "232",
-    //   price: "3541",
-    //   title: "jcvgjk",
-    // };
+  //   const foundItem = apidata.products.find((item) => item.id === id);
+  //   if (foundItem) {
+  //     setEdit(foundItem);
+  //   } else {
+  //     setEdit({ ...edit, id: id, title: "", price: "" });
+  //   }
+  // };
+  // const handleupdate = (e) => {
+  //   e.preventDefault();
 
-    // const updatepro = [...apidata.products, update];
+  //   const updateitem = apidata.products.map((item) =>
+  //     item.id === edit.id ? edit : item
+  //   );
+  //   // const form = {
+  //   //   id: "232",
+  //   //   price: "3541",
+  //   //   title: "jcvgjk",
+  //   // };
 
-    setApidata({
-      ...apidata,
-      products: updateitem,
-    });
-    setForm(false);
-    setEdit("");
-  };
+  //   // const updatepro = [...apidata.products, update];
+
+  //   setApidata({
+  //     ...apidata,
+  //     products: updateitem,
+  //   });
+  //   setForm(false);
+  //   setEdit({ id: "", title: "", price: "" });
+  // };
 
   const paginationRange = getPagination();
   return (
@@ -191,10 +217,10 @@ const App = () => {
               <td>{items.price}</td>
               <td>{items.title}</td>
               <td>
-                <button onClick={() => handledelete(items.id)}>del</button>
+                {/* <button onClick={() => handledelete(items.id)}>del</button> */}
               </td>
               <td>
-                <button onClick={() => handlEdit(items)}>Edit</button>
+                {/* <button onClick={() => handlEdit(items)}>Edit</button> */}
               </td>
             </tr>
           ))}
@@ -240,10 +266,15 @@ const App = () => {
 
       <button onClick={handleupdate}>update</button> */}
       <hr />
-      {form && edit && (
+      {/* {form && (
         <div>
           <form onSubmit={handleupdate}>
-            <input type="number" placeholder="id" value={edit.id} readOnly />
+            <input
+              type="number"
+              placeholder="id"
+              value={edit.id}
+              onChange={handleIdChange}
+            />
             <input
               type="text"
               id="title"
@@ -263,7 +294,9 @@ const App = () => {
             <button>Update</button>
           </form>
         </div>
-      )}
+      )} */}
+
+      {/* <Converts /> */}
     </>
   );
 };
