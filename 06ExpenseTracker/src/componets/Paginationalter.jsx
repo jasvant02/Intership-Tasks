@@ -1,25 +1,26 @@
 import { useEffect } from "react";
 import { useState } from "react";
-import { useDebounce } from "./usedebounce";
-import { useSearchParams, useNavigate } from "react-router-dom";
-// import { Paginationalter } from "../../06ExpenseTracker/src/componets/Paginationalter";
+// import { useDebounce } from "usedebounce";
+import { useLocalStorage } from "../../../05Pagination/src/componets/useLocalStorage";
+import { useDebounce } from "../../../05Pagination/src/usedebounce";
 // import { Converts } from "../componets/Converts";
 
-const App = () => {
+export const Paginationalter = () => {
   const [apidata, setApidata] = useState([]); //for fetching api state
   const [load, setLoad] = useState(true);
 
   const [totalpage, setTotalpage] = useState(0); //pagination
-  const [search, setSearch] = useState(""); //Searching
+  const [search, setSearch] = useLocalStorage("search", ""); //Searching
   const [sort, setSort] = useState("none"); //Sorting
   // const [form, setForm] = useState(true); //form based changes..
   // const [edit, setEdit] = useState({ id: "", title: "", price: "" });
   const seachterm = useDebounce(search, 1000);
 
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  const page = parseInt(searchParams.get("page") || 1);
+  //   const getPageUrl = () => {
+  //     const param = new URLSearchParams(window.location.search);
+  //     return parseInt(param.get("page") || 1);
+  //   };
+  const [page, setpage] = useLocalStorage("page", 1);
 
   const DOTS = "...";
   // const totalpage = Math.ceil(data.total / 10);
@@ -44,16 +45,16 @@ const App = () => {
       setLoad(false);
     }
   };
+  // useEffect(() => {}, []);
 
   useEffect(() => {
     const skipp = (page - 1) * 10;
     fetchApii(skipp, seachterm);
 
-    const handleUrl = () => {
-      setpage(getPageUrl());
-    };
-    window.addEventListener("popstate", handleUrl);
-
+    // const handleUrl = () => {
+    //   setpage(getPageUrl());
+    // };
+    // window.addEventListener("popstate", handleUrl);
     // return () => window.removeEventListener("popstate", handleUrlChange);
   }, [page, seachterm]);
 
@@ -82,29 +83,17 @@ const App = () => {
     const newSearch = e.target.value;
     setSearch(newSearch);
     handleCallNew(1, newSearch);
-
     // setpage(1);
     // fetchApii(0, newSearch);
   };
 
   const handleCallNew = (newpage) => {
     if (newpage >= 1 && newpage <= totalpage) {
-      const newSearchParams = new URLSearchParams();
+      setpage(newpage);
+      // const params = new URLSearchParams();
+      // params.set("page", newpage);
 
-      if (newpage > 1) {
-        newSearchParams.set("page", newpage);
-      }
-      // if (newpage > 2) {
-      //   newSearchParams.set("page", newpage);
-      // }
-      // if (searchTerm) {
-      //   newSearchParams.set("q", searchTerm);
-      // }
-
-      const newQueryStr = newSearchParams.toString();
-      const newUrl = `/?${newQueryStr}`.replace(/\$/, "");
-      console.log(newUrl);
-      navigate(newUrl, { replace: true });
+      // window.history.replaceState(null, "", `?${params}`);
     }
   };
 
@@ -309,11 +298,11 @@ const App = () => {
           </form>
         </div>
       )} */}
-      {/* <Paginationalter /> */}
+      <Paginationalter />
 
       {/* <Converts /> */}
     </>
   );
 };
 
-export default App;
+// export default App;
