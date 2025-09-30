@@ -35,12 +35,14 @@ export const FavBooks = () => {
   return (
     <>
       <h1>Favorite Book</h1>
+      <h3>{bookId}</h3>
       <div>
         <p>{`Title: ${newFavBook.title}`}</p>
         <p>{`By: ${newFavBook.author}`}</p>
         <p>{`Year: ${newFavBook.year}`}</p>
         <p>{`Description: ${newFavBook.description}`}</p>
         <p>pathname: {location.pathname}</p>
+        {/* <p>title:dgnh</p> */}
 
         {books.length > 1 && <button onClick={handleNextClick}>Next</button>}
       </div>

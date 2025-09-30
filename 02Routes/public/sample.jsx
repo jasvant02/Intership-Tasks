@@ -1,40 +1,76 @@
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import books from "./bookData";
+import React, { useState, useEffect } from "react";
+import {
+  useParams,
+  Link,
+  useSearchParams,
+  useNavigate,
+} from "react-router-dom";
 
-export const FavBooks = () => {
-  const { bookId } = useParams();
+export const Publisher = () => {
+  const { itemId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const currentBookIndex = books.findIndex((book) => book.id === bookId);
-  const newFavBook = books[currentBookIndex];
+  const allItems = ["abc", "def", "ghi", "jkl", "mno"];
 
-  if (!newFavBook) {
-    return (
-      <main>
-        <h1>Book not found!</h1>
-        <p>The requested book with ID "{bookId}" does not exist.</p>
-        <button onClick={() => navigate("/")}>Go back to book list</button>
-      </main>
-    );
-  }
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || ""
+  );
 
-  const handleNextClick = () => {
-    const nextIndex = (currentBookIndex + 1) % books.length;
-    const nextBookId = books[nextIndex].id;
-    navigate(`/newBook/${nextBookId}`);
+  const [filteredItems, setFilteredItems] = useState(allItems);
+
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredItems(allItems);
+    } else {
+      const filter = allItems.filter((item) =>
+        item.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredItems(filter);
+    }
+  }, [searchQuery]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSearchParams({ search: searchQuery });
+    // navigate(`/search=${encodeURIComponent(searchQuery)}`);
   };
 
   return (
-    <main>
-      <h1>Favorite Book</h1>
-      <p>{`Title: ${newFavBook.title}`}</p>
-      <p>{`By: ${newFavBook.author}`}</p>
-      <p>{`Year: ${newFavBook.year}`}</p>
-      <p>{`Description: ${newFavBook.description}`}</p>
-      <p>pathname: {location.pathname}</p>
+    <>
+      <div>
+        <h1>Publishing Companies</h1>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button type="submit">Search</button>
+        </form>
 
-      {books.length > 1 && <button onClick={handleNextClick}>Next</button>}
-    </main>
+        <h2>Searchable List</h2>
+
+        {filteredItems.length > 0 ? (
+          <ul>
+            {filteredItems.map((item) => (
+              <li key={item}>
+                <Link
+                  to={`/publisher/${encodeURIComponent(
+                    item
+                  )}?search${encodeURIComponent(searchQuery)}`}
+                >
+                  {item}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No results found for "{searchQuery}".</p>
+        )}
+      </div>
+      <button onClick={() => navigate("/")}>Go to book list</button>
+    </>
   );
 };
