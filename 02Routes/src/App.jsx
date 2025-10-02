@@ -11,11 +11,10 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Book />}></Route>
-        <Route path="/bookshop/:bookshopId" element={<Bookshop />}></Route>
-        <Route path="/searchResults" element={<Publisher />} />
-        <Route path="/searchResults/:searchTerm" element={<Publisher />} />
+        <Route path="/bookshop/" element={<Bookshop />}></Route>
+        <Route path="/publisher" element={<Publisher />}></Route>
         <Route path="newBook/:bookId" element={<FavBooks />}></Route>
-        <Route path="/searchResults" element={<SearchResults />} />
+        <Route path="/Available/:search" element={<SearchResults />} />
       </Routes>
     </>
   );

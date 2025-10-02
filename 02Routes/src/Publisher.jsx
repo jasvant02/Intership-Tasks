@@ -1,59 +1,41 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { SearchResults } from "./SearchResults";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const Publisher = () => {
-  const { searchTerm } = useParams();
   const navigate = useNavigate();
 
-  const allItems = ["abc", "def", "ghi", "jkl", "mno"];
-  const [searchQuery, setSearchQuery] = useState(searchTerm || "");
-  const [filteredItems, setFilteredItems] = useState([]);
+  const [search, setSearch] = useState("");
+  // const allItems = ["abc", "def", "ghi", "jkl", "mno"];
 
-  useEffect(() => {
-    const encoded = encodeURIComponent(searchQuery.trim());
-    if (searchQuery.trim() === "") {
-      navigate(`/searchResults`, { replace: true });
-    } else if (encoded !== searchTerm) {
-      navigate(`/searchResults/${encoded}`, { replace: true });
-    }
-  }, [searchQuery]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    const query = searchTerm || "";
-    setSearchQuery(query);
-
-    const filtered = allItems.filter((item) =>
-      item.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredItems(filtered);
-  }, [searchTerm]);
+    navigate(`/Available/${search}`);
+  };
 
   return (
     <>
       <div>
-        <h1>Publishing Companies</h1>
-        <input
-          type="text"
-          placeholder="input"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      <div>
-        {filteredItems.length > 0 ? (
+        <h1>Publishing Companies </h1>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Publishers"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button type="submit">Search</button>
+        </form>
+        {/* {allItems && (
           <ul>
-            {filteredItems.map((item) => (
+            {allItems.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
-        ) : (
-          <p>No results found for "{searchQuery}".</p>
-        )}
+        )} */}
       </div>
 
-      <button onClick={() => navigate("/")}>Go to book list</button>
+      <button onClick={() => navigate("/")}>Return</button>
     </>
   );
 };

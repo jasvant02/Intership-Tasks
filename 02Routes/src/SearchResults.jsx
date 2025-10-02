@@ -1,22 +1,17 @@
 import React from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const SearchResults = () => {
-  const [searchParams] = useSearchParams();
+  const { search } = useParams();
   const navigate = useNavigate();
-  const searchQuery = searchParams.get("search");
+
+  // const filteredItems = allItems.filter((item) => item.includes(search));
 
   return (
-    <>
-      <div>
-        <h1>Search Results</h1>
-        {searchQuery ? (
-          <h2>hello ,{searchQuery} welcome to singhing</h2>
-        ) : (
-          <p>No search query provided.</p>
-        )}
-      </div>
-      <button onClick={() => navigate(-1)}>Go back to publisher list</button>
-    </>
+    <div>
+      <h2>Avalaible Publishers are : {search}</h2>
+
+      <button onClick={() => navigate(-1)}>return</button>
+    </div>
   );
 };

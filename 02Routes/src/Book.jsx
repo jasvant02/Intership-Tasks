@@ -20,7 +20,7 @@ export const Book = () => {
       <button onClick={() => navigate("/bookshop/:bookshopId")}>
         See book shops
       </button>
-      <button onClick={() => navigate("/searchResults")}>See Publishers</button>
+      <button onClick={() => navigate("/publisher")}>See Publishers</button>
       {/* <Outlet /> */}
     </>
   );

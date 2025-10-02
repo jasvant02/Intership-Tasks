@@ -21,7 +21,7 @@ function App() {
         const formattedQuestions = data.results.map((q) => ({
           ...q,
 
-          all_answers: [...q.incorrect_answers, q.correct_answer],
+          all_answers: shuffleArray([...q.incorrect_answers, q.correct_answer]),
           isAttempted: false,
         }));
 

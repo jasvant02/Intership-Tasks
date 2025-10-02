@@ -10,22 +10,6 @@ export const FavBooks = () => {
   const currentIndex = books.findIndex((book) => book.id === bookId);
   const newFavBook = books[currentIndex];
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     navigate("/");
-  //   }, 2000);
-  // }, []);
-
-  // if (!newFavBook) {
-  //   return (
-  //     <main>
-  //       <h1>Book not found!</h1>
-  //       <p>The requested book with ID "{bookId}" does not exist.</p>
-  //       <button onClick={() => navigate("/")}>Go back to book list</button>
-  //     </main>
-  //   );
-  // }
-
   const handleNextClick = () => {
     const nextIndex = (currentIndex + 1) % books.length;
     const nextBookId = books[nextIndex].id;
